@@ -96,10 +96,13 @@ newtype LargePrime = LP Integer
 
 instance Arbitrary LargePrime where
   arbitrary =
-    do Right (g :: HashDRBG) <- (newGen . BSS.pack) `fmap` replicateM 4096 arbitrary
-       case largeRandomPrime g 64 of
-         Left _ -> fail "Large prime generation failure."
-         Right (i, _) -> return (LP i)
+    do hash <- (newGen . BSS.pack) `fmap` replicateM 4096 arbitrary
+       case hash of
+         Left _ -> fail "Large prime generation failure (newGen)."
+         Right (g :: HashDRBG) ->
+           case largeRandomPrime g 64 of
+             Left _ -> fail "Large prime generation failure."
+             Right (i, _) -> return (LP i)
 
 data KeyPairIdx = KPI Int
  deriving (Show)
